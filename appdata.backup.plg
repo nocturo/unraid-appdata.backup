@@ -2,8 +2,8 @@
 <!DOCTYPE PLUGIN [
         <!ENTITY name      "appdata.backup">
         <!ENTITY author    "Robin Kluth">
-        <!ENTITY version   "2025.09.23">
-        <!ENTITY sha256    "194144fef0859b9c7410208b3850ca6192c57fa605119ddf1164e3b0dd8e8e1c">
+        <!ENTITY version   "2026.03.13">
+        <!ENTITY sha256    "6482aacddc1f006759695afcc123c7537e9003d3a2cfa3e198b88c4dedb05fb3">
         <!ENTITY launch    "Settings/AB.Main">
         <!ENTITY plugdir   "/usr/local/emhttp/plugins/&name;">
         <!ENTITY github    "Commifreak/unraid-appdata.backup">
@@ -16,6 +16,9 @@
     <CHANGES>
         <![CDATA[
         ➕New  🩹Fix 🔧Change
+
+###2026.03.13
+- 🩹 Fix UI alignment for container backup settings. [Issue 68](https://github.com/Commifreak/unraid-appdata.backup/issues/68)
 
 ###2025.09.23
 - 🩹 Fix errors when a group resolves to no group members
