@@ -640,7 +640,6 @@ HTML;
 $plexHint
 <dt>Configured volumes <small>- (Click to exclude)</small><br /><small><abbr style="cursor:help;" title="For info, open the 'Appdata source(s)' help"><i class="fa fa-folder"></i> Internal volume | <i class="fa fa-external-link"></i> External volume</abbr></small></dt>
 <dd><div style="display: table">$volumes</div></dd>
-<br />
 
 <dt>Member of group (type something in to create one) <small>- <a href="https://forums.unraid.net/topic/137710-plugin-appdatabackup/?do=findComment&comment=1250363" target="_blank">Click here</a> and scroll to "Hints" for more</small></dt>
 <dd><div style="display: table"><input list="containerGroups" type="text" placeholder="None - Double click for a list" id='{$container['Name']}_group' name="containerSettings[{$container['Name']}][group]" value="{$containerSetting['group']}" onkeyup="$(this).next().show();" onchange="$(this).next().show();" autocomplete="off" /><span style="color: red; display: none;"><br />To adjust group order, save your changes.</span></div></dd>
