@@ -152,6 +152,8 @@ if (strstr('white,azure', $display['theme'])) {
     $containerSummaryZebraBg = 'rgba(0, 0, 0, 0.035)';
     $containerSummarySkippedBg = 'rgba(192, 96, 0, 0.14)';
     $containerSummarySkippedAccent = '#a85800';
+    $containerSummaryNoVolumesBg = 'rgba(176, 48, 48, 0.12)';
+    $containerSummaryNoVolumesAccent = '#a03030';
 } else {
     $bgcolor      = '#1c1c1c';
     $selectBorder = '1px solid #1c1b1b';
@@ -159,6 +161,8 @@ if (strstr('white,azure', $display['theme'])) {
     $containerSummaryZebraBg = 'rgba(255, 255, 255, 0.045)';
     $containerSummarySkippedBg = 'rgba(255, 170, 70, 0.14)';
     $containerSummarySkippedAccent = '#e8a040';
+    $containerSummaryNoVolumesBg = 'rgba(255, 100, 100, 0.14)';
+    $containerSummaryNoVolumesAccent = '#e87878';
 }
 
 ?>
@@ -284,13 +288,28 @@ if (strstr('white,azure', $display['theme'])) {
         min-width: 0;
     }
 
-    .dockerSettings dl.container-settings-summary .container-settings-summary__multi-mapping {
-        color: #c06000;
+    .dockerSettings dl.container-settings-summary .container-settings-summary__status-badge {
         font-size: 0.88em;
         line-height: 1.25;
         font-weight: 600;
         word-break: break-word;
         max-width: 100%;
+    }
+
+    .dockerSettings dl.container-settings-summary .container-settings-summary__multi-mapping {
+        color: #c06000;
+    }
+
+    .dockerSettings dl.container-settings-summary .container-settings-summary__no-volumes {
+        color: <?= $containerSummaryNoVolumesAccent ?>;
+    }
+
+    .docker-settings-per-container-grid > dl.container-settings-summary.container-settings-summary--no-volumes {
+        background: <?= $containerSummaryNoVolumesBg ?> !important;
+    }
+
+    .dockerSettings dl.container-settings-summary.container-settings-summary--no-volumes .container-settings-summary__title-line abbr {
+        font-weight: 600;
     }
 
     .dockerSettings dl.container-settings-summary dd {
@@ -777,10 +796,11 @@ HTML;
 
                 $image   = empty($container['Icon']) ? '/plugins/dynamix.docker.manager/images/question.png' : $container['Icon'];
                 $volumes = ABHelper::getContainerVolumes($container, true);
+                $hasNoVolumes = empty($volumes);
                 $containerSetting = $abSettings->getContainerSpecificSettings($container['Name'], false);
                 $realContainerSetting = print_r($abSettings->getContainerSpecificSettings($container['Name']), true);
 
-                if (empty($volumes)) {
+                if ($hasNoVolumes) {
                     $volumes = "<b>No volumes - container will NOT being backed up!</b>";
                 } else {
                     foreach ($volumes as $index => $volume) {
@@ -795,11 +815,15 @@ HTML;
 
                 $skipAriaLabel = htmlspecialchars('Skip this container: ' . $container['Name'], ENT_QUOTES, 'UTF-8');
                 $skipSummaryClass = ($containerSetting['skip'] === 'yes') ? ' container-settings-summary--skipped' : '';
+                $noVolumesSummaryClass = $hasNoVolumes ? ' container-settings-summary--no-volumes' : '';
+                $noVolumesBadge = $hasNoVolumes
+                    ? '<span class="container-settings-summary__status-badge container-settings-summary__no-volumes" title="This container has no volume mappings and will not be backed up">No volumes — not backed up</span>'
+                    : '';
 
                 echo <<<HTML
 <div style="display: none" id="actualContainerSettings_{$container['Name']}">$realContainerSetting</div>
-        <dl class="container-settings-summary$skipSummaryClass">
-        <dt><span class="container-settings-summary__title-line"><img alt="" src='$image' height='16' /> <i title='{$container['Image']}' class='fa fa-info-circle'></i> <abbr title='Click for advanced settings'>{$container['Name']}$plexContainerNameSuffix</abbr></span><span id="containerMultiMappingIssue_{$container['Name']}" class="container-settings-summary__multi-mapping" style="display: none;">WARN: Multi mapping detected!</span></dt>
+        <dl class="container-settings-summary$skipSummaryClass$noVolumesSummaryClass">
+        <dt><span class="container-settings-summary__title-line"><img alt="" src='$image' height='16' /> <i title='{$container['Image']}' class='fa fa-info-circle'></i> <abbr title='Click for advanced settings'>{$container['Name']}$plexContainerNameSuffix</abbr></span>$noVolumesBadge<span id="containerMultiMappingIssue_{$container['Name']}" class="container-settings-summary__status-badge container-settings-summary__multi-mapping" style="display: none;">WARN: Multi mapping detected!</span></dt>
         <dd>
         <select class="container-settings-summary__skip" name="containerSettings[{$container['Name']}][skip]" id="{$container['Name']}_skip" data-setting="{$containerSetting['skip']}" aria-label="$skipAriaLabel">
             <option value="no">No</option>
