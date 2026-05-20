@@ -357,7 +357,8 @@ class ABHelper {
         if ($containerSettings['backupExtVolumes'] == 'no') {
             self::backupLog("Should NOT backup external volumes, sanitizing them...");
             foreach ($volumes as $index => $volume) {
-                if (!self::isVolumeWithinAppdata($volume)) {
+                $keep = self::isVolumeWithinAppdata($volume) || self::isDockerEngineManagedVolumePath($volume);
+                if (!$keep) {
                     unset($volumes[$index]);
                 }
             }
@@ -522,7 +523,55 @@ class ABHelper {
     }
 
     /**
-     * Helper, to get all host paths of a container
+     * Docker Engine data root (parent of the "volumes" directory). Cached for one PHP process.
+     */
+    private static ?string $dockerRootDir = null;
+
+    /**
+     * @return non-empty-string
+     */
+    public static function getDockerRootDir(): string {
+        if (self::$dockerRootDir !== null) {
+            return self::$dockerRootDir;
+        }
+        $out = [];
+        $rc  = 0;
+        exec("docker info -f '{{.DockerRootDir}}' 2>/dev/null", $out, $rc);
+        $dir = ($rc === 0 && !empty($out[0])) ? trim($out[0]) : '';
+        if ($dir === '' || !str_starts_with($dir, '/')) {
+            $dir = '/var/lib/docker';
+        }
+        self::$dockerRootDir = rtrim($dir, '/');
+        return self::$dockerRootDir;
+    }
+
+    /**
+     * True if $absolutePath is under Docker's local volume store ({@see getDockerRootDir}/volumes/...).
+     * Used so named volumes are still backed up when "backup external volumes" is off.
+     */
+    public static function isDockerEngineManagedVolumePath(string $absolutePath): bool {
+        if (!str_starts_with($absolutePath, '/')) {
+            return false;
+        }
+        $root = self::getDockerRootDir();
+        return str_starts_with($absolutePath, $root . '/volumes/');
+    }
+
+    /**
+     * Resolve a named Docker volume to its on-disk _data directory (local driver).
+     */
+    private static function resolveNamedDockerVolumeToMountpoint(string $volumeName): ?string {
+        $cmd = 'docker volume inspect ' . escapeshellarg($volumeName) . ' --format ' . escapeshellarg('{{ .Mountpoint }}') . ' 2>/dev/null';
+        exec($cmd, $out, $rc);
+        if ($rc !== 0 || empty($out[0])) {
+            return null;
+        }
+        $mp = rtrim(trim($out[0]), '/');
+        return $mp !== '' ? $mp : null;
+    }
+
+    /**
+     * Helper, to get all host paths of a container (bind mounts and resolved named volume mountpoints).
      * @param $container
      * @return array
      */
@@ -531,27 +580,40 @@ class ABHelper {
 
         $volumes = [];
         foreach ($container['Volumes'] ?? [] as $volume) {
-            $hostPath = rtrim(explode(":", $volume)[0], '/');
-            if (empty($hostPath)) {
+            $rawSource = rtrim(explode(":", $volume)[0], '/');
+            if (empty($rawSource)) {
                 self::backupLog("This volume is empty (rootfs mapped??)! Ignoring.", self::LOGLEVEL_DEBUG);
                 continue;
+            }
+
+            if (str_starts_with($rawSource, '/')) {
+                $hostPath = $rawSource;
+            } else {
+                $resolved = self::resolveNamedDockerVolumeToMountpoint($rawSource);
+                if ($resolved === null) {
+                    self::backupLog(
+                        "Named Docker volume '$rawSource' could not be resolved (docker volume inspect failed — volume missing or docker unavailable). Skipping.",
+                        self::LOGLEVEL_WARN
+                    );
+                    continue;
+                }
+                $hostPath = $resolved;
+                self::backupLog("Named Docker volume '$rawSource' -> host path '$hostPath'.", self::LOGLEVEL_DEBUG);
             }
 
             if (!$skipExclusionCheck) {
                 $containerSettings = $abSettings->getContainerSpecificSettings($container['Name']);
 
-                if (in_array($hostPath, $containerSettings['exclude'])) {
-                    self::backupLog("Ignoring '$hostPath' because its listed in containers exclusions list!", self::LOGLEVEL_DEBUG);
+                if (in_array($rawSource, $containerSettings['exclude']) || in_array($hostPath, $containerSettings['exclude'])) {
+                    self::backupLog("Ignoring '$rawSource' (or resolved path) because its listed in containers exclusions list!", self::LOGLEVEL_DEBUG);
                     continue;
                 }
 
-                if (in_array($hostPath, $abSettings->globalExclusions)) {
-                    self::backupLog("Ignoring '$hostPath' because its listed in global exclusions list!", self::LOGLEVEL_DEBUG);
+                if (in_array($rawSource, $abSettings->globalExclusions) || in_array($hostPath, $abSettings->globalExclusions)) {
+                    self::backupLog("Ignoring '$rawSource' (or resolved path) because its listed in global exclusions list!", self::LOGLEVEL_DEBUG);
                     continue;
                 }
             }
-
-            // @todo: if no / inside path, we are dealing with a docker volume and not a bind-mount!
 
             if (!file_exists($hostPath)) {
                 self::backupLog("'$hostPath' does NOT exist! Please check your mappings! Skipping it for now.", self::LOGLEVEL_ERR);
