@@ -148,9 +148,17 @@ if ($_POST) {
  */
 if (strstr('white,azure', $display['theme'])) {
     $bgcolor = '#f2f2f2';
+    $containerSummaryRowHoverBg = 'rgba(0, 0, 0, 0.06)';
+    $containerSummaryZebraBg = 'rgba(0, 0, 0, 0.035)';
+    $containerSummarySkippedBg = 'rgba(192, 96, 0, 0.14)';
+    $containerSummarySkippedAccent = '#a85800';
 } else {
     $bgcolor      = '#1c1c1c';
     $selectBorder = '1px solid #1c1b1b';
+    $containerSummaryRowHoverBg = 'rgba(255, 255, 255, 0.08)';
+    $containerSummaryZebraBg = 'rgba(255, 255, 255, 0.045)';
+    $containerSummarySkippedBg = 'rgba(255, 170, 70, 0.14)';
+    $containerSummarySkippedAccent = '#e8a040';
 }
 
 ?>
@@ -185,6 +193,172 @@ if (strstr('white,azure', $display['theme'])) {
 
     .dockerSettings dt {
         width: 54%;
+    }
+
+    /**
+     * Per-container summary: bounded-width grid for the compact list only (header + summary rows).
+     * Do NOT max-width the wrapper — expanded blockquote panels need the full left column or floats bleed into "Start order".
+     */
+    .docker-settings-per-container-grid {
+        --ab-pc-grid-cols: minmax(0, 1fr) auto;
+        box-sizing: border-box;
+    }
+
+    .docker-settings-per-container-grid__header,
+    .dockerSettings dl.container-settings-summary {
+        display: grid;
+        grid-template-columns: var(--ab-pc-grid-cols);
+        column-gap: 0.65rem;
+        max-width: 48rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .docker-settings-per-container-grid__header {
+        align-items: end;
+        padding: 0.5rem 0.35rem 0.35rem 0.35rem;
+        font-weight: bold;
+        border-bottom: 1px solid rgba(127, 127, 127, 0.45);
+        margin-bottom: 0.15rem;
+    }
+
+    /* webGUI defaults dt to text-align:right — force normal reading order for this table-like list */
+    .docker-settings-per-container-grid__col-name {
+        justify-self: start;
+        text-align: left !important;
+    }
+
+    .docker-settings-per-container-grid__col-skip {
+        justify-self: end;
+        text-align: right;
+    }
+
+    .docker-settings-per-container-grid > dl.container-settings-summary:nth-of-type(even) {
+        background: <?= $containerSummaryZebraBg ?>;
+    }
+
+    .dockerSettings dl.container-settings-summary {
+        align-items: start;
+        margin: 0;
+        padding: 0.35rem 0.35rem;
+        border-bottom: 1px solid rgba(127, 127, 127, 0.12);
+        clear: both;
+        border-radius: 3px;
+    }
+
+    .dockerSettings dl.container-settings-summary:hover {
+        background: <?= $containerSummaryRowHoverBg ?> !important;
+    }
+
+    .dockerSettings dl.container-settings-summary dt,
+    .dockerSettings dl.container-settings-summary dd {
+        float: none !important;
+        margin: 0;
+        padding: 0;
+        width: auto !important;
+        min-width: 0;
+    }
+
+    .dockerSettings dl.container-settings-summary dt {
+        justify-self: stretch;
+        text-align: left !important;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.2rem;
+        min-width: 0;
+    }
+
+    .dockerSettings dl.container-settings-summary .container-settings-summary__title-line {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .dockerSettings dl.container-settings-summary .container-settings-summary__title-line abbr {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        min-width: 0;
+    }
+
+    .dockerSettings dl.container-settings-summary .container-settings-summary__multi-mapping {
+        color: #c06000;
+        font-size: 0.88em;
+        line-height: 1.25;
+        font-weight: 600;
+        word-break: break-word;
+        max-width: 100%;
+    }
+
+    .dockerSettings dl.container-settings-summary dd {
+        justify-self: end;
+        text-align: right !important;
+        padding-top: 0.12rem;
+    }
+
+    .dockerSettings dl.container-settings-summary dd select {
+        min-width: 5.75rem;
+    }
+
+    .docker-settings-per-container-grid > dl.container-settings-summary.container-settings-summary--skipped {
+        background: <?= $containerSummarySkippedBg ?> !important;
+    }
+
+    .dockerSettings dl.container-settings-summary.container-settings-summary--skipped .container-settings-summary__skip {
+        font-weight: bold;
+        color: <?= $containerSummarySkippedAccent ?>;
+    }
+
+    .dockerSettings dl.container-settings-summary.container-settings-summary--skipped .container-settings-summary__title-line abbr {
+        font-weight: 600;
+    }
+
+    /* Expanded per-container help: do not set display here — webGUI hides blockquote.inline_help with display:none until dt is clicked */
+    .docker-settings-per-container-grid blockquote.inline_help {
+        clear: both;
+        max-width: 100%;
+        width: 100%;
+        box-sizing: border-box;
+        margin: 0.35rem 0 0.65rem 0;
+        overflow: hidden;
+    }
+
+    .docker-settings-per-container-grid blockquote.inline_help > dl {
+        display: grid;
+        grid-template-columns: minmax(8.5rem, 34%) minmax(0, 1fr);
+        column-gap: 0.75rem;
+        align-items: start;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        float: none !important;
+    }
+
+    .docker-settings-per-container-grid blockquote.inline_help > dl > dt,
+    .docker-settings-per-container-grid blockquote.inline_help > dl > dd {
+        float: none !important;
+        width: auto !important;
+        max-width: 100%;
+        min-width: 0;
+        margin: 0 0 0.55rem 0;
+        padding: 0;
+        box-sizing: border-box;
+        text-align: left !important;
+    }
+
+    .docker-settings-per-container-grid blockquote.inline_help > dl > div {
+        grid-column: 1 / -1;
+        margin: 0.35rem 0;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .docker-settings-per-container-grid blockquote.inline_help textarea {
+        max-width: 100% !important;
+        box-sizing: border-box;
     }
 
     .sortable {
@@ -577,6 +751,12 @@ if (($code ?? 0) != 0) {
                 ?>
             </datalist>
 
+            <div class="docker-settings-per-container-grid">
+            <div class="docker-settings-per-container-grid__header" role="presentation">
+                <span class="docker-settings-per-container-grid__col-name">Container</span>
+                <span class="docker-settings-per-container-grid__col-skip">Skip</span>
+            </div>
+
             <?php
             $dockerClient  = new DockerClient();
             $allContainers = $dockerClient->getDockerContainers();
@@ -613,22 +793,15 @@ HTML;
 
                 $containerExcludes = implode("\r\n", $containerSetting['exclude']);
 
+                $skipAriaLabel = htmlspecialchars('Skip this container: ' . $container['Name'], ENT_QUOTES, 'UTF-8');
+                $skipSummaryClass = ($containerSetting['skip'] === 'yes') ? ' container-settings-summary--skipped' : '';
+
                 echo <<<HTML
-<style>
-.containerSettingsDt {
-    overflow: hidden;
-    white-space: nowrap
-}
-.containerSettingsDt:after {
-    opacity: 0.1;
-    content: "  _____________________________________________________________________________________________________________________________________________________________________";
-}
-</style>
 <div style="display: none" id="actualContainerSettings_{$container['Name']}">$realContainerSetting</div>
-        <dl>
-        <dt class="containerSettingsDt"><img alt="pic" src='$image' height='16' /> <i title='{$container['Image']}' class='fa fa-info-circle'></i> <abbr title='Click for advanced settings'>{$container['Name']}$plexContainerNameSuffix</abbr> <span id="containerMultiMappingIssue_{$container['Name']}" style="display: none; color: darkorange;">WARN: Multi mapping detected!</span></dt>
-        <dd><label for="{$container['Name']}_skip">&nbsp;&nbsp;Skip?</label>
-        <select name="containerSettings[{$container['Name']}][skip]" id="{$container['Name']}_skip" data-setting="{$containerSetting['skip']}">
+        <dl class="container-settings-summary$skipSummaryClass">
+        <dt><span class="container-settings-summary__title-line"><img alt="" src='$image' height='16' /> <i title='{$container['Image']}' class='fa fa-info-circle'></i> <abbr title='Click for advanced settings'>{$container['Name']}$plexContainerNameSuffix</abbr></span><span id="containerMultiMappingIssue_{$container['Name']}" class="container-settings-summary__multi-mapping" style="display: none;">WARN: Multi mapping detected!</span></dt>
+        <dd>
+        <select class="container-settings-summary__skip" name="containerSettings[{$container['Name']}][skip]" id="{$container['Name']}_skip" data-setting="{$containerSetting['skip']}" aria-label="$skipAriaLabel">
             <option value="no">No</option>
             <option value="yes">Yes</option>
     </select>
@@ -704,6 +877,7 @@ HTML;
 
             }
             ?>
+            </div>
 
         </div>
         <div style="flex-grow: 1; flex-basis: 0; padding-left: 10px; max-width: 35%;">
@@ -928,6 +1102,8 @@ HTML;
             $(this).find('option[value="' + $(this).data('setting') + '"]').prop('selected', true);
         });
 
+        updateContainerSkipHighlight();
+        $('.docker-settings-per-container-grid').on('change', '.container-settings-summary__skip', updateContainerSkipHighlight);
 
         $('#manualBackup').on('click', function () {
             swal({
@@ -986,6 +1162,13 @@ HTML;
         console.debug('Final form:', $(this).serialize());
     });
 
+
+    function updateContainerSkipHighlight() {
+        $('.docker-settings-per-container-grid .container-settings-summary__skip').each(function () {
+            $(this).closest('dl.container-settings-summary')
+                .toggleClass('container-settings-summary--skipped', $(this).val() === 'yes');
+        });
+    }
 
     function addSelectionToList(element) {
         $el = $(element).prev().find("input:checked");
