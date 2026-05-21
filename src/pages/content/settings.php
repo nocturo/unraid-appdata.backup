@@ -375,6 +375,38 @@ if (strstr('white,azure', $display['theme'])) {
         box-sizing: border-box;
     }
 
+    .docker-settings-per-container-grid blockquote.inline_help .container-settings-advanced-toggle a {
+        cursor: pointer;
+    }
+
+    .docker-settings-per-container-grid blockquote.inline_help .container-settings-advanced-panel {
+        margin-top: 0.25rem;
+    }
+
+    .docker-settings-per-container-grid blockquote.inline_help .container-settings-advanced-dl {
+        display: grid;
+        grid-template-columns: minmax(8.5rem, 34%) minmax(0, 1fr);
+        column-gap: 0.75rem;
+        align-items: start;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .docker-settings-per-container-grid blockquote.inline_help .container-settings-advanced-dl > dt,
+    .docker-settings-per-container-grid blockquote.inline_help .container-settings-advanced-dl > dd {
+        float: none !important;
+        width: auto !important;
+        max-width: 100%;
+        min-width: 0;
+        margin: 0 0 0.55rem 0;
+        padding: 0;
+        box-sizing: border-box;
+        text-align: left !important;
+    }
+
     .docker-settings-per-container-grid blockquote.inline_help textarea {
         max-width: 100% !important;
         box-sizing: border-box;
@@ -849,7 +881,7 @@ $plexHint
 	
 	<dt>Update container after backup?</dt>
     <dd><select id='{$container['Name']}_updateContainer' name="containerSettings[{$container['Name']}][updateContainer]" data-setting="{$containerSetting['updateContainer']}">
-            <option value=''>Use standard</option>
+            <option value=''>Use default</option>
             <option value='yes'>Yes</option>
             <option value='no'>No</option>
         </select>
@@ -861,9 +893,9 @@ $plexHint
 
 
 
-<div onclick="$(this).next().toggle();"><a style="cursor:pointer;">Show advanced options</a></div>
-	<div style="display: none;">
-	
+<div class="container-settings-advanced-toggle" onclick="$(this).next().toggle();"><a>Show advanced options</a></div>
+	<div class="container-settings-advanced-panel" style="display: none;">
+	<dl class="container-settings-advanced-dl">
 	<dt>Skip backup? <small>Only stop/start</small></dt>
 <dd><select id='{$container['Name']}_skipBackup' name="containerSettings[{$container['Name']}][skipBackup]" data-setting="{$containerSetting['skipBackup']}" >
 		<option value='no'>No, do backup as well</option>
@@ -872,7 +904,7 @@ $plexHint
 	
 	<dt>Verify Backup?</dt>
 <dd><select id='{$container['Name']}_verifyBackup' name="containerSettings[{$container['Name']}][verifyBackup]" data-setting="{$containerSetting['verifyBackup']}" >
-		<option value=''>Use standard</option>
+		<option value=''>Use default</option>
 		<option value='yes'>Yes</option>
 		<option value='no'>No</option>
 	</select></dd>
@@ -880,18 +912,18 @@ $plexHint
 <dt>Ignore errors during backup?</dt>
 <dd>
     <select id='{$container['Name']}_ignoreBackupErrors' name="containerSettings[{$container['Name']}][ignoreBackupErrors]" data-setting="{$containerSetting['ignoreBackupErrors']}">
-        <option value=''>Use standard</option>
+        <option value=''>Use default</option>
         <option value='yes'>Yes</option>
 		<option value='no'>No</option>
 	</select>
 </dd>
     <dt>Skip stopping of container? <small><abbr title="This will skip stopping this container and leaves it running. Could lead to broken backup for this container!">NOT RECOMMENDED!</abbr></small></dt>
     <dd><select id='{$container['Name']}_dontStop' name="containerSettings[{$container['Name']}][dontStop]" data-setting="{$containerSetting['dontStop']}" >
-            <option value=''>Use standard</option>
+            <option value=''>Use default</option>
             <option value='no'>No</option>
             <option value='yes'>Yes</option>
         </select></dd>
-        
+	</dl>
 	</div>
 
 </dl>

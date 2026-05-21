@@ -10,8 +10,125 @@ if (!ABHelper::isArrayOnline()) {
     return;
 }
 
-
 ?>
+
+<style>
+    /* Match settings page: full-width section titles; grid only on form rows (overrides webGUI floats) */
+    #restoreForm dt {
+        width: 54%;
+    }
+
+    #restoreForm dl {
+        display: grid !important;
+        grid-template-columns: minmax(9rem, 54%) minmax(0, 1fr);
+        column-gap: 0.75rem;
+        align-items: start;
+        width: 100%;
+        max-width: 100%;
+        margin: 0 0 0.5rem 0;
+        padding: 0;
+        box-sizing: border-box;
+        clear: both;
+        float: none !important;
+    }
+
+    #restoreForm dl > dt,
+    #restoreForm dl > dd {
+        float: none !important;
+        width: auto !important;
+        max-width: 100%;
+        min-width: 0;
+        margin: 0 0 0.65rem 0;
+        padding: 0;
+        box-sizing: border-box;
+        text-align: left !important;
+    }
+
+    #restoreForm dl > dt {
+        padding-top: 0.15rem;
+        justify-self: start;
+    }
+
+    #restoreForm blockquote.inline_help {
+        clear: both;
+        max-width: 100%;
+        margin: 0 0 0.75rem 0;
+        overflow: hidden;
+    }
+
+    #restoreForm .restore-form__destination-note {
+        margin: 0 0 0.65rem 0;
+        line-height: 1.45;
+    }
+
+    #restoreForm .restore-form__actions {
+        clear: both;
+        margin: 0.75rem 0 1.5rem 0;
+        padding-left: 54%;
+        box-sizing: border-box;
+    }
+
+    #restoreForm .restore-form__actions button {
+        width: auto !important;
+        min-width: 6.5rem;
+        max-width: 100%;
+        display: inline-block !important;
+        float: none !important;
+    }
+
+    #restoreForm #restoreBackupList {
+        min-width: min(100%, 28rem);
+        max-width: 100%;
+    }
+
+    #restoreForm .restore-form__checkbox-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        max-width: 100%;
+    }
+
+    #restoreForm .restore-form__checkbox-list label {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.4rem;
+        margin: 0;
+        font-weight: normal;
+        text-align: left !important;
+        cursor: pointer;
+        word-break: break-word;
+    }
+
+    #restoreForm .restore-form__checkbox-list label input {
+        flex-shrink: 0;
+        margin-top: 0.2rem;
+    }
+
+    #restoreForm .restore-form__checkbox-row {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin: 0;
+    }
+
+    #restoreForm .restore-form__checkbox-row input {
+        margin: 0;
+    }
+
+    @media (max-width: 48rem) {
+        #restoreForm dl {
+            grid-template-columns: 1fr;
+        }
+
+        #restoreForm dl > dt {
+            margin-bottom: 0.15rem;
+        }
+
+        #restoreForm .restore-form__actions {
+            padding-left: 0;
+        }
+    }
+</style>
 
 <div class="title"><span class="left"><i class="fa fa-rotate-left title"></i>Restore</span></div>
 <p>On this page, you are able to restore a previous made backup.</p>
@@ -48,33 +165,32 @@ if (!ABHelper::isArrayOnline()) {
         <p>The folder which contains <code>ab_xxx</code> folders.</p>
     </blockquote>
 
-
     <dl>
         <dt><b>Backup destination:</b></dt>
         <dd>
-            <div style="display: table">The <b>default</b> destination will be the same as it were during backup. If the
-                destination does not exist, it will be
-                created. Any existing data will be overwritten!<br/>
-                <b>If you want to force a custom destination</b>, enter it below. The archive will be extracted
-                there<br/>
-                <b>THIS IS ONLY APPLICABLE TO ARCHIVES!</b><br/>
-                <input type='text' class='ftAttach' id="customRestoreDestination" name="customRestoreDestination"
-                       placeholder="Force custom destination"
-                       data-pickfilter="HIDE_FILES_FILTER" data-pickfolders="true"><br/><br/>
-                <button onclick="checkRestoreSource(); return false;">Next</button>
-            </div>
+            <p class="restore-form__destination-note">The <b>default</b> destination will be the same as it were during backup. If the
+                destination does not exist, it will be created. Any existing data will be overwritten!</p>
+            <p class="restore-form__destination-note"><b>If you want to force a custom destination</b>, enter it below. The archive will be extracted
+                there. <b>THIS IS ONLY APPLICABLE TO ARCHIVES!</b></p>
+            <input type='text' class='ftAttach' id="customRestoreDestination" name="customRestoreDestination"
+                   placeholder="Force custom destination"
+                   data-pickfilter="HIDE_FILES_FILTER" data-pickfolders="true">
         </dd>
     </dl>
 
+    <div class="restore-form__actions">
+        <button type="button" onclick="checkRestoreSource(); return false;">Next</button>
+    </div>
 
     <div id="restoreBackupDiv" style="display: none">
         <div class="title"><span class="left"><i class="fa fa-folder title"></i>Step 2: Select backup</span></div>
         <dl>
             <dt><b>Select backup:</b></dt>
-            <dd><select required id="restoreBackupList" name="restoreBackupList"></select>
-                <button onclick="checkRestoreItem(); return false;">Next</button>
-            </dd>
+            <dd><select required id="restoreBackupList" name="restoreBackupList"></select></dd>
         </dl>
+        <div class="restore-form__actions">
+            <button type="button" onclick="checkRestoreItem(); return false;">Next</button>
+        </div>
     </div>
 
     <div id="restoreItemsDiv" style="display: none">
@@ -82,34 +198,32 @@ if (!ABHelper::isArrayOnline()) {
         <p><b>Note:</b> If one item is not selectable, the chosen backup does not contain needed data.</p>
 
         <dl>
-            <dt><b>Restore backup config?:</b></dt>
-            <dd><input type="checkbox" id="restoreItemConfig" name="restoreItem[config]"> Yes</dd>
+            <dt><b>Restore backup config?</b></dt>
+            <dd><label class="restore-form__checkbox-row"><input type="checkbox" id="restoreItemConfig" name="restoreItem[config]"> Yes</label></dd>
 
-            <dt><b>Restore extra files?:</b></dt>
-            <dd><input type="checkbox" id="restoreItemExtraFiles" name="restoreItem[extraFiles]"> Yes</dd>
-            <br/>
-            <dt><b>Restore VM meta?:</b></dt>
-            <dd><input type="checkbox" id="restoreItemVmMeta" name="restoreItem[vmMeta]"> Yes</dd>
-            <br/>
-            <dt><b>Restore templates?:</b></dt>
-            <dd>
-                <div style="display: table;" id="restoreTemplatesDD"></div>
-            </dd>
+            <dt><b>Restore extra files?</b></dt>
+            <dd><label class="restore-form__checkbox-row"><input type="checkbox" id="restoreItemExtraFiles" name="restoreItem[extraFiles]"> Yes</label></dd>
 
-            <dt><b>Restore containers?:</b></dt>
-            <dd>
-                <div style="display: table;" id="restoreContainersDD"></div>
-            </dd>
+            <dt><b>Restore VM meta?</b></dt>
+            <dd><label class="restore-form__checkbox-row"><input type="checkbox" id="restoreItemVmMeta" name="restoreItem[vmMeta]"> Yes</label></dd>
+
+            <dt><b>Restore templates?</b></dt>
+            <dd><div class="restore-form__checkbox-list" id="restoreTemplatesDD"></div></dd>
+
+            <dt><b>Restore containers?</b></dt>
+            <dd><div class="restore-form__checkbox-list" id="restoreContainersDD"></div></dd>
         </dl>
 
-        <button onclick="startRestore(); return false;">Do it!</button>
+        <div class="restore-form__actions">
+            <button type="button" onclick="startRestore(); return false;">Do it!</button>
+        </div>
     </div>
 
 </form>
 
 <script>
     function checkRestoreSource() {
-        $('#restoreItemsDiv, #restoreItemsDiv').hide();
+        $('#restoreBackupDiv, #restoreItemsDiv').hide();
         $.ajax(url, {
             data: {action: 'checkRestoreSource', src: $('#restoreSource').val()}
         }).done(function (data) {
@@ -169,14 +283,20 @@ if (!ABHelper::isArrayOnline()) {
                 if (data.result.templateFiles) {
                     $('#restoreTemplatesDD').html('');
                     $.each(data.result.templateFiles, function (i) {
-                        $('#restoreTemplatesDD').append('<input type="checkbox" name="restoreItem[templates][' + data.result.templateFiles[i] + ']" /> ' + data.result.templateFiles[i] + '<br />');
+                        var file = data.result.templateFiles[i];
+                        $('#restoreTemplatesDD').append(
+                            '<label><input type="checkbox" name="restoreItem[templates][' + file + ']" /> <span>' + file + '</span></label>'
+                        );
                     });
                 }
 
                 if (data.result.containers) {
                     $('#restoreContainersDD').html('');
                     $.each(data.result.containers, function (i) {
-                        $('#restoreContainersDD').append('<input type="checkbox" name="restoreItem[containers][' + data.result.containers[i] + ']" /> ' + data.result.containers[i] + '<br />');
+                        var container = data.result.containers[i];
+                        $('#restoreContainersDD').append(
+                            '<label><input type="checkbox" name="restoreItem[containers][' + container + ']" /> <span>' + container + '</span></label>'
+                        );
                     });
                 }
 
