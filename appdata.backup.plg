@@ -2,8 +2,8 @@
 <!DOCTYPE PLUGIN [
         <!ENTITY name      "appdata.backup">
         <!ENTITY author    "nocturo">
-        <!ENTITY version   "2026.05.20">
-        <!ENTITY sha256    "5d221cf7a6d384def5bc916eb130a9164d476ddf7b6ce325aa792a55c6bb09e1">
+        <!ENTITY version   "2026.05.21">
+        <!ENTITY sha256    "3ba5b133e249156a30af87b5e55b6ae9e8d6a40e9439c2f9986186e55e341db4">
         <!ENTITY launch    "Settings/AB.Main">
         <!ENTITY plugdir   "/usr/local/emhttp/plugins/&name;">
         <!ENTITY github    "nocturo/unraid-appdata.backup">
